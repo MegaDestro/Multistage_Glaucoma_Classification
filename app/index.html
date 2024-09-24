@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Glaucoma Detection</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Existing CSS styles... */
+
+    #uploaded-image {
+      max-width: 300px;
+      max-height: 300px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Glaucoma Detection</h1>
+  <form id="detection-form" enctype="multipart/form-data">
+    <label for="image-input">Select an image:</label>
+    <input type="file" id="image-input" accept="image/*" required>
+    <button type="submit">Detect</button>
+  </form>
+  <img id="uploaded-image" src="" alt="Uploaded Image">
+  <div id="result"></div>
+
+  <script>
+    const form = document.getElementById('detection-form');
+    const resultDiv = document.getElementById('result');
+    const imageElement = document.getElementById('uploaded-image');
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const file = document.getElementById('image-input').files[0];
+      const formData = new FormData();
+      formData.append('image', file);
+
+      try {
+        const response = await fetch('http://127.0.0.1:5000/predict', {
+          method: 'POST',
+          body: formData
+        });
+        const prediction = await response.text();
+        resultDiv.textContent = `Prediction: ${prediction}`;
+
+        // Display the uploaded image
+        const reader = new FileReader();
+        reader.onload = () => {
+          imageElement.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+      } catch (error) {
+        resultDiv.textContent = 'Error: Unable to make a prediction.';
+        console.error('Error:', error);
+      }
+    });
+  </script>
+</body>
+</html>
